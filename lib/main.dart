@@ -81,16 +81,18 @@ class _HomePageState extends State<HomePage> {
         itemBuilder: (BuildContext ctx, int index) {
           //how to show item in the screen
           final item = widget.items[index];
-          return CheckboxListTile(
-            title: Text(item.title),
+          return Dismissible(
+            child: CheckboxListTile(
+              title: Text(item.title),
+              value: item.done,
+              onChanged: (value) {
+                //state required to update value
+                setState(() {
+                  item.done = value;
+                });
+              },
+            ),
             key: Key(item.title),
-            value: item.done,
-            onChanged: (value) {
-              //state required to update value
-              setState(() {
-                item.done = value;
-              });
-            },
           );
         },
       ),
