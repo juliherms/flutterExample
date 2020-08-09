@@ -43,18 +43,42 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  //text controller for control input
+  var newTaskCtrl = TextEditingController();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       //specific widget represents page
       appBar: AppBar(
-        title: Text("TODO List"),
+        title: TextFormField(
+          controller: newTaskCtrl,
+          keyboardType: TextInputType.text,
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 18,
+          ),
+          decoration: InputDecoration(
+            labelText: "New TODO",
+            labelStyle: TextStyle(color: Colors.white),
+          ),
+        ),
       ),
       body: ListView.builder(
         itemCount: widget.items.length, //size from my items
         itemBuilder: (BuildContext ctx, int index) {
           //how to show item in the screen
-          return Text(widget.items[index].title);
+          final item = widget.items[index];
+          return CheckboxListTile(
+            title: Text(item.title),
+            key: Key(item.title),
+            value: item.done,
+            onChanged: (value) {
+              //state required to update value
+              setState(() {
+                item.done = value;
+              });
+            },
+          );
         },
       ),
     );
