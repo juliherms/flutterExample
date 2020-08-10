@@ -1,6 +1,8 @@
 //import graphic design
-import 'package:flutter/material.dart';
+import 'dart:convert';
 
+import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'models/item.dart';
 
 //principal function
@@ -32,10 +34,6 @@ class HomePage extends StatefulWidget {
   //constructor
   HomePage() {
     items = [];
-    //populate my items
-    items.add(Item(title: "Item 1", done: false));
-    items.add(Item(title: "Item 2", done: true));
-    items.add(Item(title: "Item 3", done: false));
   }
 
   @override
@@ -46,6 +44,10 @@ class _HomePageState extends State<HomePage> {
   //text controller for control input
   var newTaskCtrl = TextEditingController();
 
+  //constructor
+  _HomePageState() {
+    load();
+  }
   //method responsible to add item
   void add() {
     //check value blank
@@ -56,6 +58,36 @@ class _HomePageState extends State<HomePage> {
       widget.items.add(Item(title: newTaskCtrl.text, done: false));
       newTaskCtrl.clear();
     });
+    save();
+  }
+
+  //Method responsible to remove item
+  void remove(int index) {
+    setState(() {
+      widget.items.removeAt(index);
+    });
+    save();
+  }
+
+  //method responsible to read storage
+  Future load() async {
+    var prefs = await SharedPreferences.getInstance();
+    var data = prefs.getString('data');
+
+    if (data != null) {
+      Iterable decoded = jsonDecode(data);
+      List<Item> result = decoded.map((e) => Item.fromJson(e)).toList();
+      //update items
+      setState(() {
+        widget.items = result;
+      });
+    }
+  }
+
+  //method responsible to save information in shared preferences
+  save() async {
+    var prefs = await SharedPreferences.getInstance();
+    await prefs.setString('data', jsonEncode(widget.items));
   }
 
   @override
@@ -89,10 +121,17 @@ class _HomePageState extends State<HomePage> {
                 //state required to update value
                 setState(() {
                   item.done = value;
+                  save();
                 });
               },
             ),
             key: Key(item.title),
+            background: Container(
+              color: Colors.red.withOpacity(0.2),
+            ),
+            onDismissed: (direction) {
+              remove(index);
+            },
           );
         },
       ),
